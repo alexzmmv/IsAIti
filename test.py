@@ -4,14 +4,20 @@ import json
 url = 'http://localhost:8000/'
 
 message_data = {
-    'message': 'exit chat'
+    'message': ''
 }
 
-try:
-    response = requests.post(url + 'chat/8ab9d54a-6409-48a1-ab82-34bce3c7da9c/message', json=message_data)
-    response.raise_for_status()  # Raise an error for bad status codes
-    print(response.json())
-except requests.exceptions.RequestException as e:
-    print(f"An error occurred: {e}")
-except json.JSONDecodeError:
-    print("The response is not in JSON format.")
+def create_chat():
+    response = requests.post(url + 'chat/new')
+    response.raise_for_status()
+    return response.json().get('chat_id')
+
+chat_id = create_chat()
+while True:
+    message = input("Message: ")
+    response = requests.post(url + f'chat/{chat_id}/message', json={'message': message})
+    response.raise_for_status()
+    data = response.json()
+    print(f"Server: {data['response']}")
+    if message == "exit chat":
+        break

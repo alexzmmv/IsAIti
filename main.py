@@ -69,13 +69,14 @@ async def create_chat():
     """Create a new chat session"""
     chat_id = str(uuid.uuid4())
     random.seed(chat_id)
-    # isAi=random.choice([True, False])
-    isAi = False
+    isAi=random.choice([True, False])
     chat_sessions[chat_id] = {
         "type": "ai" if isAi else "human",
         "history": [],
         "isTerminated": False
     }
+    if(not isAi):
+        connection.sendall("\nA new chat session has been created\n".encode())
     return {"chat_id": chat_id, "message": "Chat session created"}
 
 @app.post("/chat/{chat_id}/message", response_model=ChatResponse)
@@ -144,6 +145,6 @@ async def end_chat_session(chat_id: str):
         raise HTTPException(status_code=404, detail="Chat session not found")
     #if it is an Human chat session, Send a message to the human client to end the chat
     if chat_sessions[chat_id]["type"] == "human":
-        connection.sendall("------------------\n another chat\n\n".encode())
+        connection.sendall("\n chat session ended\n".encode())
     chat_sessions[chat_id]["isTerminated"] = True
     return {"chat_id": chat_id, "message": "Chat session ended"}
