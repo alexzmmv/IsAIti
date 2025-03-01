@@ -13,7 +13,8 @@ def tcp_client(ip, port):
     while True:
         data = sock.recv(1024)
         print(f"The victim:{data.decode()}")
-        if(data.decode() == "\nA new chat session has been created\n"):
+        if data.decode() == "\nA new chat session has been created\n" or data.decode() == "\nChat session ended\n" :
+            print(data.decode())
             continue
         if message == "exit chat":
             break

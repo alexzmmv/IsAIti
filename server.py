@@ -136,15 +136,19 @@ async def get_chat_history(chat_id: str):
     if chat_id not in chat_sessions:
         raise HTTPException(status_code=404, detail="Chat session not found")
 
-    return {"chat_id": chat_id, "history": chat_sessions[chat_id]["history"]}
+    return {"chat_id": chat_id, "history": chat_sessions[chat_id]["history"], "isTerminated": chat_sessions[chat_id]["isTerminated"]}
 
 @app.get("/chat/{chat_id}/end")
-async def end_chat_session(chat_id: str):
+async def end_chat_session(chat_id: str, guess: str):
     """End a chat session"""
     if chat_id not in chat_sessions:
-        raise HTTPException(status_code=404, detail="Chat session not found")
-    #if it is an Human chat session, Send a message to the human client to end the chat
-    if chat_sessions[chat_id]["type"] == "human":
-        connection.sendall("\n chat session ended\n".encode())
+        raise HTTPException(status_code=404, detail="Chat session not found")        
+    is_corect = False
     chat_sessions[chat_id]["isTerminated"] = True
-    return {"chat_id": chat_id, "message": "Chat session ended"}
+    if(chat_sessions[chat_id]["type"] == "human"):
+        connection.sendall("\nChat session ended\n".encode())
+    if(guess == chat_sessions[chat_id]["type"]):
+        is_corect = True
+    
+
+    return {"chat_id": chat_id, "message": "Chat session ended", "is_corect": is_corect}
