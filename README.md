@@ -15,7 +15,7 @@ INSTRUCTIONS=_custom instruction for your ai_
 2. Create and activate a virtual environment:
     ```sh
     python3 -m venv venv
-    source venv/bin/activate
+    source venv/bin/activateˆ
     ```
 
 3. Install the required dependencies:
@@ -25,10 +25,11 @@ INSTRUCTIONS=_custom instruction for your ai_
 
 4. Start the server:
     ```sh
-    uvicorn main:app --host 0.0.0.0 --port <PORT>
+    uvicorn main:app 
     ```
-    - Replace `<PORT>` with a port number between 10000 and 14000.
+    - Server now will ask you to put a tcp server ip and port
     - Ensure the server is set to `0.0.0.0` to accept all incoming connections.
+    - Add port number between 10000 and 14000.
     - Disable the firewall if needed.
 
 ## Running the Human Client
