@@ -9,7 +9,6 @@ import uuid
 from google import genai
 from google.genai import types
 import socket
-import threading
 
 # Load API key from .env file
 load_dotenv(".env")
