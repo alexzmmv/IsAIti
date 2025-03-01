@@ -36,7 +36,7 @@ INSTRUCTIONS=_custom instruction for your ai_
 
 - **On another device:**
     - Ensure both devices are on the same network.
-    - Provide the server IP and the port used as arguments.
+    - Provide the server device ip and the port used as arguments.
 
 - **On the same device:**
     - Use `localhost` and the port used as arguments.
