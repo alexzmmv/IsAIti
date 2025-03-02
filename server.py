@@ -9,14 +9,9 @@ import uuid
 from google import genai
 from google.genai import types
 import socket
+import time
+from contextlib import asynccontextmanager
 
-# Load API key from .env file
-load_dotenv(".env")
-# FastAPI app instance
-app = FastAPI()
-
-# In-memory storage for chat sessions
-chat_sessions = {}
 
 # Model definitions
 class Message(BaseModel):
@@ -31,15 +26,41 @@ class ChatResponse(BaseModel):
     response: str
     history: List[Message]
 
+
+# In-memory storage for chat sessions
+chat_sessions = {}
 MODEL = genai.Client(api_key=os.getenv("GEMINI_API_KEY")).models
 INSTRUCTIONS = os.getenv("INSTRUCTIONS")
 sock = None
 connection = None
 client_address = None
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    load_dotenv(".env")
+    while True:
+        try:
+            accept_connections()
+            break
+        except Exception as e:
+            print(f"Error accepting connections: {e}")
+            time.sleep(2)  # Wait for 5 seconds before retrying
+    yield
+    close_connection()
+    
+
+def close_connection():
+    connection.close()
+    print("Connection closed")
+
+
 def accept_connections():
     print("Starting TCP server")
+    
     ip=input("Enter the IP address of the tcp server: ")
+    if ip=="exit" :
+        os._exit(0)
     port=int(input("Enter the port number of the server: "))
     global sock
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
@@ -53,15 +74,10 @@ def accept_connections():
     connection, client_address = sock.accept()
     print("Connection established to the human client")
 
-def close_connection():
-    connection.close()
-    print("Connection closed")
+# FastAPI app instance
+app = FastAPI(lifespan=lifespan)
 
-accept_connections()
 
-@app.on_event("shutdown")
-def shutdown_event():
-    close_connection()
 
 @app.post("/chat/new")
 async def create_chat():
@@ -86,14 +102,20 @@ async def send_message(chat_id: str, request: ChatRequest):
 
     if chat_sessions[chat_id]["isTerminated"]:
         raise HTTPException(status_code=400, detail="Chat session is terminated")
-
+    
     # Get the chat session
     session = chat_sessions[chat_id]
     # Store user message in history
     user_message = Message(role="user", content=request.message)
     session["history"].append(user_message)
     if chat_sessions[chat_id]["type"] == "ai":
+        # Calculate delay based on message length and a random factor
+        message_length = len(request.message)
+        random_delay = random.uniform(0.7, 2)
+        delay = message_length * 0.06 + random_delay
+        time.sleep(delay)
         try:
+            
             # Prepare the conversation history for the model
             conversation_history = "\n".join([f"{msg.role}: {msg.content}" for msg in session["history"]])
             # Get response from Gemini
