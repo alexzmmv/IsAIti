@@ -25,7 +25,7 @@ INSTRUCTIONS=_custom instruction for your ai_
 
 4. Start the server:
     ```sh
-    uvicorn main:app 
+    uvicorn server:app --reload
     ```
     - Server now will ask you to put a tcp server ip and port
     - Ensure the server is set to `0.0.0.0` to accept all incoming connections.
